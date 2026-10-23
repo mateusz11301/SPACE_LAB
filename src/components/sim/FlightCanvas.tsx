@@ -80,7 +80,7 @@ export function FlightCanvas({ stateRef, config }: { stateRef: React.RefObject<S
         for (let i = 0; i < 6; i++) particles.push({ x: cx + (Math.random() - 0.5) * 10, y: rocketY + 4, vx: (Math.random() - 0.5) * 1.5, vy: 3 + Math.random() * 3, life: 1 });
       }
       for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
+        const p = particles[i]!;
         p.x += p.vx; p.y += p.vy; p.vx *= 1.02; p.life -= 0.035;
         if (p.life <= 0) { particles.splice(i, 1); continue; }
         const hue = 20 + (1 - p.life) * 30;

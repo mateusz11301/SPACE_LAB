@@ -186,7 +186,7 @@ function Param({ label, unit, value, min, max, step, onChange, disabled, fmt }: 
         <span className="text-muted-foreground">{label}</span>
         <span className="font-mono text-primary">{fmt ? fmt(value) : value.toLocaleString("pl-PL")} {unit}</span>
       </div>
-      <Slider value={[value]} min={min} max={max} step={step} disabled={disabled} onValueChange={(v) => onChange(v[0])} />
+      <Slider value={[value]} min={min} max={max} step={step} disabled={!!disabled} onValueChange={(v) => onChange(v[0] ?? value)} />
     </div>
   );
 }
