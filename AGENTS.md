@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep aerospace calculations in a browser-safe simulation module, separate from rendering, so deterministic flight rules can be tested.
+- The simulator route is client-only; React Three Fiber reads continuous flight refs while the Polish DOM dashboard receives throttled snapshots.
+- Use a spherical planet and SI units in simulation; render a floating-origin local scene to retain precision across orbital distances.
