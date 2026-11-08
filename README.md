@@ -1,26 +1,34 @@
-# Faithful Frame Ui Crafter
+<div align="center">
+  <img src="ESA_logo.png" alt="ESA Logo" width="200" style="filter: invert(1);" />
+  
+  <h3><strong>Live Demo: <a href="https://space-lab.lovable.app">space-lab.lovable.app</a></strong></h3>
+</div>
 
-Implement exactly the screenshot and nothing else
+# Space Lab 🚀
 
-This project was built with [Lovable](https://lovable.dev).
+![Space Lab Interface](interface.png)
 
-**Live app**: https://faithful-frame-ui-crafter.lovable.app
+## About The Project
 
-## Build with Lovable
+This project was created as part of a school workshop led by a representative from the **European Space Agency (ESA)**. The challenge was to create an interactive application or game about space. 
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/0b1f3ade-bc30-41d7-8656-4dc27f03e07a).
+I decided to build a **Rocket Flight Physics Simulator** (6-DOF) that visualizes telemetry, staging, and orbital mechanics in real-time. 
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Development Process
 
-## Development
+This project is a demonstration of **AI-driven Rapid Prototyping** (often referred to as "vibecoding"). It was entirely built and iterated using **Lovable** to quickly bring a complex UI and physics concept to life. 
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Instead of writing boilerplate code, I focused on:
+* Systems design and application logic.
+* Prompt engineering and iterative refinement.
+* Tuning the physical parameters (TWR, drag, Isp) for realism.
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+## Features
+* 🛰️ **Real-time Telemetry:** Velocity, altitude, dynamic pressure (Max-Q), and G-forces.
+* 🚀 **Orbital Mechanics:** Staging (Booster / Orbiter separation) and trajectory visualization.
+* 🎛️ **Flight Computer:** Autopilot modes (KILL ROT, SAS) and manual thrust control.
+
+---
+*Created as part of an ESA School Workshop challenge.*
+
+*Disclaimer: This is an independent, non-commercial student project created for educational purposes during an ESA school workshop challenge. The ESA acronym and logo are registered trademarks of the European Space Agency. The European Space Agency received no financial compensation for this Initiative.*
