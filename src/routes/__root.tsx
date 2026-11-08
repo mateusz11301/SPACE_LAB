@@ -78,8 +78,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Symulator Startu Rakiety" },
-      { name: "description", content: "Interaktywny symulator fizyki startu rakiety 2D." },
+      { title: "SPACE LAB — Laboratorium lotu 3D" },
+      { name: "description", content: "Polskie laboratorium inżynierii lotu rakietowego i mechaniki orbitalnej 3D." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
