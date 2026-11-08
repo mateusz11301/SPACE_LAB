@@ -16,7 +16,7 @@ I decided to build a **Rocket Flight Physics Simulator** (6-DOF) that visualizes
 
 ## Development Process
 
-This project is a demonstration of **AI-driven Rapid Prototyping** (often referred to as "vibecoding"). It was entirely built and iterated using **Lovable** to quickly bring a complex UI and physics concept to life. 
+This project is a demonstration of **AI-driven Rapid Prototyping**. It was entirely built and iterated using **Lovable** to quickly bring a complex UI and physics concept to life. 
 
 Instead of writing boilerplate code, I focused on:
 * Systems design and application logic.
