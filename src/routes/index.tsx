@@ -36,11 +36,15 @@ function SpaceLab() {
   const [tab, setTab] = useState('mission'), [settingsTab, setSettingsTab] = useState('rocket');
   const [markers, setMarkers] = useState(false), [prediction, setPrediction] = useState(true), [pip, setPip] = useState(true);
   const [palette, setPalette] = useState<ScenePalette | null>(null), [fullscreenError, setFullscreenError] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const css = getComputedStyle(document.documentElement), result: Record<string, string> = {};
     for (const key of ['sky', 'space', 'ocean', 'land', 'concrete', 'metal', 'dark', 'light', 'flame', 'hot', 'trace', 'atmosphere']) result[key] = css.getPropertyValue(`--scene-${key}`).trim();
     setPalette(result as ScenePalette);
+    const syncFullscreen = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    return () => document.removeEventListener('fullscreenchange', syncFullscreen);
   }, []);
   const locked = flight.launched, terminal = ['rud', 'landed', 'crash'].includes(v.phase);
   const fuelMax = v.id === 'upper' ? 90000 : config.fuelMass, fuelPct = v.fuel / fuelMax * 100;
@@ -88,6 +92,7 @@ function SpaceLab() {
         {tab === 'engineering' ? <Engineering sim={sim} /> : tab === 'flightdata' ? <FlightData sim={sim} /> : <>
           <div className="viewport-toolbar"><div className="flex items-center gap-2"><span className="live-dot" /><span>WIZUALIZACJA LOTU</span><span className="viewport-tag">3D LIVE</span></div><div className="flex gap-1"><Button size="icon" variant="ghost" aria-label="Telemetria obraz w obrazie" title="Telemetria obraz w obrazie" onClick={() => setPip(!pip)} className={pip ? 'text-primary' : ''}><Gauge /></Button><Button size="icon" variant="ghost" aria-label="Pełny ekran" title="Pełny ekran" onClick={fullscreen}><Expand /></Button></div></div>
           <div ref={viewport} className="flight-viewport">
+            {isFullscreen && <Button variant="secondary" size="icon" className="absolute right-3 top-24 z-10" aria-label="Wyjdź z pełnego ekranu" title="Wyjdź z pełnego ekranu" onClick={fullscreen}><Expand /></Button>}
             {palette && <SpaceScene flightRef={sim.flightRef} config={config} cameraMode={sim.cameraMode} markers={markers} prediction={prediction} palette={palette} />}
             <div className="viewport-info"><div className="text-xs text-muted-foreground">SL-9 <span className="text-primary">//</span> STOPIEŃ {v.id === 'upper' ? 'II' : 'I'}</div><div className={cn('flight-status', terminal ? 'text-destructive' : 'text-foreground')}>{PHASES[v.phase]}</div><div className="viewport-location"><Target size={12} />{config.body === 'earth' ? 'CAPE CANAVERAL' : PLANETS[config.body].name.toUpperCase()} · LC-39A</div></div>
             <div className="viewport-coordinate"><span>ALT</span> {alt(m.altitude)}<br /><span>VEL</span> {m.speed.toFixed(1)} m/s</div>
