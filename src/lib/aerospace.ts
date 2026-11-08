@@ -103,7 +103,8 @@ export function telemetry(f: Flight, c: AerospaceConfig, vehicle = activeVehicle
   const q = 0.5 * a.rho * airV.lengthSq() / 1000;
   const orbit = orbitalElements(vehicle.p, vehicle.v, c);
   const gravity = b.g * (b.radius / r) ** 2;
-  const brakingAcc = Math.max(0.01, thrust / mass - gravity);
+  const maxThrust = (vehicle.id === 'upper' ? 950 : c.thrustKN) * 1000 * (isp / PROPELLANTS[c.propellant].sl);
+  const brakingAcc = Math.max(0.01, maxThrust / mass - gravity);
   const fallTime = (vertical + Math.sqrt(vertical ** 2 + 2 * gravity * altitude)) / gravity;
   return { altitude, speed: vehicle.v.length(), vertical, horizontal, mach: airV.length() / a.sound, q, density: a.rho, pressure: a.pressure, isp, thrust, mass,
     gforce: thrust / mass / G0, deltaV: isp * G0 * Math.log(mass / (vehicle.dryMass + (attached ? 94000 : 0))),
@@ -129,7 +130,13 @@ function advanceVehicle(f: Flight, c: AerospaceConfig, v: Vehicle, dt: number, i
   if (v.mode === 'prograde' && m.speed > 1) desired.copy(v.v).normalize();
   if (v.mode === 'retrograde' && m.speed > 1) desired.copy(v.v).normalize().negate();
   if (v.mode === 'gravity') {
-    const tilt = clamp((m.altitude - 150) / 75000, 0, 1) * Math.PI / 2;
+    let tilt = clamp((m.altitude - 150) / 75000, 0, 1) * Math.PI / 2;
+    if (v.id === 'upper' && m.altitude > 75000) {
+      const targetVertical = clamp((180000 - m.altitude) * 0.01, -100, 500);
+      const maxAcc = 950000 * (m.isp / PROPELLANTS[c.propellant].sl) / m.mass;
+      const radialDemand = b.g * (b.radius / v.p.length()) ** 2 - m.centrifugal + (targetVertical - m.vertical) * 0.045;
+      tilt = Math.acos(clamp(radialDemand / Math.max(1, maxAcc), -0.25, 0.7));
+    }
     const east = new Vector3(1, 0, 0).addScaledVector(up, -up.x).normalize();
     desired.multiplyScalar(Math.cos(tilt)).addScaledVector(east, Math.sin(tilt)).normalize();
     // Throttle through Max-Q instead of allowing a nominal gravity turn to disintegrate.
@@ -143,11 +150,11 @@ function advanceVehicle(f: Flight, c: AerospaceConfig, v: Vehicle, dt: number, i
     const az = clamp(-v.p.z * 0.008 - v.v.z * 0.18, -3, 3);
     desired.copy(up).add(new Vector3(ax / b.g, 0, az / b.g)).normalize();
     const maxThrust = (v.id === 'upper' ? 950 : c.thrustKN) * 1000 * (m.isp / PROPELLANTS[c.propellant].sl);
-    const decel = Math.max(0.1, maxThrust / m.mass - b.g);
+    const decel = Math.max(0.1, maxThrust / m.mass * Math.cos(m.pitch * Math.PI / 180) - b.g);
     const braking = m.vertical ** 2 / (2 * decel);
     if (m.vertical < 0 && m.altitude < braking * 1.35 + 80) {
-      const targetDescent = -Math.min(80, Math.sqrt(Math.max(0, m.altitude) * 1.5));
-      const demand = b.g + (targetDescent - m.vertical) * 1.5;
+      const targetDescent = -Math.min(80, Math.sqrt(Math.max(0, m.altitude - 5) * Math.min(1.5, decel * 0.7)));
+      const demand = b.g + (targetDescent - m.vertical) * 2;
       v.throttle = clamp(demand * m.mass / maxThrust, 0, 1);
       if (m.altitude < 10) v.throttle = clamp((b.g + (-1.5 - m.vertical) * 2) * m.mass / maxThrust, 0, 1);
     } else v.throttle = 0;
@@ -204,7 +211,9 @@ function advanceVehicle(f: Flight, c: AerospaceConfig, v: Vehicle, dt: number, i
     v.p.normalize().multiplyScalar(b.radius + 2); v.v.set(0, 0, 0); v.omega.set(0, 0, 0); v.throttle = 0;
     addEvent(f, v.phase === 'landed' ? 'Miękkie lądowanie · podwozie amortyzuje kontakt' : 'Uderzenie w powierzchnię · utrata pojazdu', v.phase === 'landed' ? 'success' : 'warn'); return;
   }
-  const nextPhase: FlightPhase = m.periapsis > ORBIT_HEIGHT ? 'orbit' : m.vertical < 0 ? 'descent' : v.fuel > 0 && v.throttle > 0 ? 'ascent' : 'coast';
+  const updatedOrbit = orbitalElements(v.p, v.v, c);
+  if (v.mode === 'gravity' && updatedOrbit.periapsis > ORBIT_HEIGHT) v.throttle = 0;
+  const nextPhase: FlightPhase = updatedOrbit.periapsis > ORBIT_HEIGHT ? 'orbit' : m.vertical < 0 ? 'descent' : v.fuel > 0 && v.throttle > 0 ? 'ascent' : 'coast';
   if (nextPhase === 'orbit' && v.phase !== 'orbit') addEvent(f, 'STABILNA ORBITA OSIĄGNIĘTA!', 'success');
   if (v.fuel === 0 && v.phase === 'ascent') addEvent(f, `${v.id === 'booster' ? 'I' : 'II'} stopień: wyczerpanie paliwa · MECO`, 'warn');
   v.phase = nextPhase;

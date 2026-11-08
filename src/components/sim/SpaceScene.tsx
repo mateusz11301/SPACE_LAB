@@ -41,7 +41,7 @@ function Cylinder({ position, size, color, metal = 0.4 }: { position: [number, n
 }
 function Rocket({ vehicle, flightRef, config, palette: p, markers }: { vehicle: 'booster' | 'upper' } & Pick<SceneProps, 'flightRef' | 'config' | 'palette' | 'markers'>) {
   const root = useRef<Group>(null), exhaust = useRef<Group>(null), nozzle = useRef<Group>(null), heat = useRef<Mesh>(null), mach = useRef<Mesh>(null), rcs = useRef<Group>(null);
-  const fins = useRef<Group[]>([]), legs = useRef<Group[]>([]);
+  const fins = useRef<Group[]>([]), legs = useRef<Group[]>([]), com = useRef<Mesh>(null);
   const hull = useMemo(() => surfaceTexture(p, 'hull'), [p]);
   const profile = useMemo(() => new LatheGeometry([new Vector2(0, 0), new Vector2(1.8, 0), new Vector2(1.8, 37), new Vector2(1.7, 40), new Vector2(1.4, 43), new Vector2(0.8, 46), new Vector2(0, 48)], 32), []);
   const up = useMemo(() => new Vector3(0, 1, 0), []);
@@ -60,6 +60,7 @@ function Rocket({ vehicle, flightRef, config, palette: p, markers }: { vehicle: 
     if (nozzle.current) nozzle.current.rotation.set(v.gimbal.x, 0, v.gimbal.z);
     if (heat.current) heat.current.visible = v.temperature > PLASMA_TEMP || destroyed;
     const m = telemetry(f, config, v);
+    if (com.current) com.current.position.y = m.com;
     if (mach.current) { mach.current.visible = m.mach > 0.92 && m.mach < 1.18 && m.density > 0.01; mach.current.scale.setScalar(1 + Math.sin(clock.elapsedTime * 4) * 0.1); }
     if (rcs.current) { rcs.current.visible = v.rcs > 0.03; rcs.current.scale.setScalar(0.7 + Math.sin(clock.elapsedTime * 30) * 0.3); }
     fins.current.forEach((fin) => { fin.rotation.z += ((v.fins ? Math.PI / 2 : 0) - fin.rotation.z) * (1 - Math.exp(-4 * dt)); fin.rotation.y = v.gimbal.x * 4; });
@@ -86,7 +87,7 @@ function Rocket({ vehicle, flightRef, config, palette: p, markers }: { vehicle: 
         </group>
       </group>)}
       <group ref={rcs} position={[0, 39, 0]}>{[0, 1, 2, 3].map(i => <mesh key={i} rotation-z={Math.PI / 2} rotation-y={i * Math.PI / 2} position={[Math.sin(i * Math.PI / 2) * 2.5, 0, Math.cos(i * Math.PI / 2) * 2.5]}><coneGeometry args={[0.5, 2, 12]} /><meshBasicMaterial color={p.light} transparent opacity={0.65} /></mesh>)}</group>
-      {markers && <><mesh position={[0, 22, 2]}><sphereGeometry args={[0.5, 12, 12]} /><meshBasicMaterial color={p.trace} /></mesh><mesh position={[0, 29, 2]}><sphereGeometry args={[0.5, 12, 12]} /><meshBasicMaterial color={p.hot} /></mesh></>}
+      {markers && <><mesh ref={com} position={[0, 22, 2]}><sphereGeometry args={[0.5, 12, 12]} /><meshBasicMaterial color={p.trace} /></mesh><mesh position={[0, 29, 2]}><sphereGeometry args={[0.5, 12, 12]} /><meshBasicMaterial color={p.hot} /></mesh></>}
     </group>
     <group ref={exhaust} position={[0, -1, 0]}>
       <mesh position={[0, -8, 0]} rotation-z={Math.PI}><coneGeometry args={[1.65, 16, 24]} /><meshBasicMaterial color={p.flame} transparent opacity={0.7} depthWrite={false} /></mesh>
