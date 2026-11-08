@@ -50,4 +50,30 @@ describe('SPACE LAB engineering rules', () => {
     expect(f.booster.fuel).toBeCloseTo(DEFAULT_CONFIG.fuelMass - m.thrust / (m.isp * 9.80665) * 0.01, 2);
   });
   it('has no atmosphere on the Moon', () => { expect(atmosphere({ ...DEFAULT_CONFIG, body: 'moon' }, 0).rho).toBe(0); });
+  it.each(['pad', 'ship'] as const)('lands a separated booster below 3 m/s at %s', target => {
+    const c = { ...DEFAULT_CONFIG, target }, f = makeFlight(c);
+    f.running = true; f.launched = true; f.separated = true;
+    f.booster.phase = 'descent'; f.booster.mode = 'landing'; f.booster.p.y += 1000;
+    f.booster.p.x = target === 'ship' ? 5000 : 0; f.booster.v.y = -100;
+    f.booster.fuel = 30000; f.booster.throttle = 0;
+    for (let i = 0; i < 6000 && f.running; i++) advanceFlight(f, c, 0.01);
+    expect(f.booster.phase).toBe('landed'); expect(f.booster.landingSpeed).toBeLessThan(3);
+  });
+  it('conserves total stage mass through separation', () => {
+    const f = makeFlight(DEFAULT_CONFIG); f.launched = true;
+    const before = telemetry(f, DEFAULT_CONFIG).mass;
+    separate(f, DEFAULT_CONFIG);
+    expect(telemetry(f, DEFAULT_CONFIG, f.booster).mass + telemetry(f, DEFAULT_CONFIG).mass).toBe(before);
+  });
+  it('inserts the two-stage gravity turn into a bound orbit above 100 km and cuts thrust', () => {
+    const f = makeFlight(DEFAULT_CONFIG); f.launched = true; f.running = true; f.booster.mode = 'gravity';
+    for (let i = 0; i < 100000; i++) {
+      advanceFlight(f, DEFAULT_CONFIG, 0.01);
+      if (!f.separated && f.booster.fuel < 35000) separate(f, DEFAULT_CONFIG);
+      if (telemetry(f, DEFAULT_CONFIG).periapsis > 100000) break;
+    }
+    const m = telemetry(f, DEFAULT_CONFIG);
+    expect(m.periapsis).toBeGreaterThan(100000); expect(Number.isFinite(m.apoapsis)).toBe(true);
+    expect(f.upper?.throttle).toBe(0);
+  });
 });
