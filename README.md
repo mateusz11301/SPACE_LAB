@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="ESA_logo.png" alt="ESA Logo" width="200" style="filter: invert(1);" />
-  
   <h3><strong>Live Demo: <a href="https://space-lab.lovable.app">space-lab.lovable.app</a></strong></h3>
 </div>
 
@@ -30,5 +28,3 @@ Instead of writing boilerplate code, I focused on:
 
 ---
 *Created as part of an ESA School Workshop challenge.*
-
-*Disclaimer: This is an independent, non-commercial student project created for educational purposes during an ESA school workshop challenge. The ESA acronym and logo are registered trademarks of the European Space Agency. The European Space Agency received no financial compensation for this Initiative.*
