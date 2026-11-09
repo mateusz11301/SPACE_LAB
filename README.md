@@ -8,7 +8,7 @@
 
 ## About The Project
 
-This project was created as part of a school workshop led by a representative from the **European Space Agency (ESA)**. The challenge was to create an interactive application or game about space. 
+This project was created as part of a school workshop led by a representative from the **European Space Agency (ESA)**. The challenge was to create an interactive application or game about space with AI. 
 
 I decided to build a **Rocket Flight Physics Simulator** (6-DOF) that visualizes telemetry, staging, and orbital mechanics in real-time. 
 
